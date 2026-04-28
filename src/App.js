@@ -445,17 +445,6 @@ export default function App() {
               </div>
               <div className="toggle-row">
                 <div>
-                  <div className="toggle-label">Humidifier</div>
-                  <div className="toggle-sub">{humid < 30 ? 'Auto-active' : 'Standby'}</div>
-                </div>
-                <label className="toggle">
-                  <input type="checkbox" checked={humid < 30} readOnly />
-                  <div className="toggle-track" />
-                  <div className="toggle-thumb" />
-                </label>
-              </div>
-              <div className="toggle-row">
-                <div>
                   <div className="toggle-label">Pill Restock Alert</div>
                   <div className="toggle-sub">Notify when &lt; 5 pills</div>
                 </div>
