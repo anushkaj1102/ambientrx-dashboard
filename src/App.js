@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
@@ -76,7 +76,7 @@ export default function App() {
   const [cooling, setCooling] = useState(false);
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [cameraImg, setCameraImg] = useState(null);
+  const [cameraImg] = useState(null);
 
   // History data for charts
   const [tempHistory, setTempHistory]   = useState([]);
