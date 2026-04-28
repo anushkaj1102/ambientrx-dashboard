@@ -68,6 +68,8 @@ function CustomTooltip({ active, payload, label, unit }) {
 export default function App() {
   const MAX_PILLS = 30;
 
+  const [activeTab, setActiveTab] = useState('overview');
+
   // Live sensor state
   const [temp, setTemp]       = useState(24.1);
   const [humid, setHumid]     = useState(52.3);
@@ -157,239 +159,296 @@ export default function App() {
         </div>
       </div>
 
-      {/* ── Row 1: 4 stat cards ── */}
-      <div className="grid-4">
-
-        {/* Temperature */}
-        <div className="card card-accent-cyan">
-          <div className="card-title">🌡 Temperature</div>
-          <div className="gauge-wrap">
-            <ArcGauge value={temp} min={0} max={50} color={tempColor} />
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <span className="stat-value" style={{ color: tempColor }}>{temp}</span>
-            <span className="stat-unit"> °C</span>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <span className={`stat-status status-${tempStatus}`}>
-              {tempStatus === 'good' ? '✓' : '⚠'} {statusLabel[tempStatus]}
-            </span>
-          </div>
-        </div>
-
-        {/* Humidity */}
-        <div className="card card-accent-blue">
-          <div className="card-title">💧 Humidity</div>
-          <div className="gauge-wrap">
-            <ArcGauge value={humid} min={0} max={100} color={humidColor} />
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <span className="stat-value" style={{ color: humidColor }}>{humid}</span>
-            <span className="stat-unit"> %RH</span>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <span className={`stat-status status-${humidStatus}`}>
-              {humidStatus === 'good' ? '✓' : '⚠'} {statusLabel[humidStatus]}
-            </span>
-          </div>
-        </div>
-
-        {/* Pill Count */}
-        <div className="card card-accent-purple">
-          <div className="card-title">💊 Pill Count</div>
-          <div className="pill-display">
-            <div className={`pill-number ${pillColor}`}>{pills}</div>
-            <div className="pill-label">of {MAX_PILLS} remaining</div>
-          </div>
-          <div className="pill-bar-wrap">
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#475569', marginBottom: 4 }}>
-              <span>0</span><span>Stock level</span><span>{MAX_PILLS}</span>
-            </div>
-            <div className="pill-bar-track">
-              <div className="pill-bar-fill" style={{
-                width: `${(pills / MAX_PILLS) * 100}%`,
-                background: pillBarColor
-              }} />
-            </div>
-          </div>
-          {pills <= 5 && (
-            <div className="stat-status status-danger" style={{ marginTop: 10, justifyContent: 'center' }}>
-              ⚠ Restock Required
-            </div>
-          )}
-        </div>
-
-        {/* Light */}
-        <div className="card card-accent-yellow">
-          <div className="card-title">☀ Light Sensor</div>
-          <div style={{ textAlign: 'center', padding: '10px 0' }}>
-            <div className="stat-value" style={{ color: light ? '#f59e0b' : '#06b6d4', fontSize: 28 }}>
-              {lightLux} <span className="stat-unit">lux</span>
-            </div>
-            <div style={{ marginTop: 16 }}>
-              <span className={`stat-status ${light ? 'status-warn' : 'status-good'}`}>
-                {light ? '⚠ Alert: Box Open' : '✓ Safe'}
-              </span>
-            </div>
-            <div style={{
-              marginTop: 16,
-              width: 60, height: 60,
-              borderRadius: '50%',
-              background: light ? '#fffbeb' : '#f0fdf4',
-              border: `2px solid ${light ? '#f59e0b' : '#10b981'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '16px auto 0',
-              fontSize: 24
-            }}>
-              {light ? '🔆' : '🌑'}
-            </div>
-          </div>
-        </div>
+      {/* ── Tabs ── */}
+      <div className="tab-bar">
+        <button
+          className={`tab-btn ${activeTab === 'overview' ? 'tab-active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          📊 Overview
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'charts' ? 'tab-active' : ''}`}
+          onClick={() => setActiveTab('charts')}
+        >
+          📈 Charts
+        </button>
       </div>
 
-      {/* ── Row 2: Charts ── */}
-      <div className="grid-2">
-        <div className="card card-accent-cyan">
-          <div className="card-title">📈 Temperature History</div>
-          <div className="chart-wrap">
-            <ResponsiveContainer width="100%" height={160}>
-              <LineChart data={tempHistory}>
-                <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
-                <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#94a3b8' }} interval="preserveStartEnd" />
-                <YAxis domain={[15, 45]} tick={{ fontSize: 9, fill: '#94a3b8' }} width={28} />
-                <Tooltip content={<CustomTooltip unit="°C" />} />
-                <Line type="monotone" dataKey="value" stroke="#06b6d4"
-                  strokeWidth={2} dot={false} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      {/* ── Tab 1: Overview ── */}
+      {activeTab === 'overview' && (
+        <>
+          {/* 4 stat cards */}
+          <div className="grid-4">
 
-        <div className="card card-accent-blue">
-          <div className="card-title">📈 Humidity History</div>
-          <div className="chart-wrap">
-            <ResponsiveContainer width="100%" height={160}>
-              <LineChart data={humidHistory}>
-                <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
-                <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#94a3b8' }} interval="preserveStartEnd" />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#94a3b8' }} width={28} />
-                <Tooltip content={<CustomTooltip unit="%" />} />
-                <Line type="monotone" dataKey="value" stroke="#3b82f6"
-                  strokeWidth={2} dot={false} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Row 3: Alerts + Controls + Camera ── */}
-      <div className="grid-3">
-
-        {/* Alerts */}
-        <div className="card card-accent-red">
-          <div className="card-title">🚨 System Alerts</div>
-          <div className="alert-row">
-            <span className="alert-name">🌡 Temperature</span>
-            <span className={`alert-badge ${temp > 30 ? 'badge-alert' : 'badge-ok'}`}>
-              {temp > 30 ? 'ALERT' : 'OK'}
-            </span>
-          </div>
-          <div className="alert-row">
-            <span className="alert-name">💧 Humidity</span>
-            <span className={`alert-badge ${humid > 70 || humid < 30 ? 'badge-alert' : humid > 60 ? 'badge-warn' : 'badge-ok'}`}>
-              {humid > 70 || humid < 30 ? 'ALERT' : humid > 60 ? 'WARN' : 'OK'}
-            </span>
-          </div>
-          <div className="alert-row">
-            <span className="alert-name">☀ Light</span>
-            <span className={`alert-badge ${light ? 'badge-warn' : 'badge-ok'}`}>
-              {light ? 'OPEN' : 'OK'}
-            </span>
-          </div>
-          <div className="alert-row">
-            <span className="alert-name">💊 Pills</span>
-            <span className={`alert-badge ${pills <= 5 ? 'badge-alert' : pills <= 10 ? 'badge-warn' : 'badge-ok'}`}>
-              {pills <= 5 ? 'RESTOCK' : pills <= 10 ? 'LOW' : 'OK'}
-            </span>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="card card-accent-green">
-          <div className="card-title">🎛 Controls</div>
-
-          <div className="toggle-row">
-            <div>
-              <div className="toggle-label">Cooling Fan</div>
-              <div className="toggle-sub">{cooling ? 'Running' : 'Standby'}</div>
+            {/* Temperature */}
+            <div className="card card-accent-cyan">
+              <div className="card-title">🌡 Temperature</div>
+              <div className="gauge-wrap">
+                <ArcGauge value={temp} min={0} max={50} color={tempColor} />
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <span className="stat-value" style={{ color: tempColor }}>{temp}</span>
+                <span className="stat-unit"> °C</span>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <span className={`stat-status status-${tempStatus}`}>
+                  {tempStatus === 'good' ? '✓' : '⚠'} {statusLabel[tempStatus]}
+                </span>
+              </div>
             </div>
-            <label className="toggle">
-              <input type="checkbox" checked={cooling}
-                onChange={e => {
-                  setCooling(e.target.checked);
-                  addLog(`Fan manually ${e.target.checked ? 'activated' : 'deactivated'}`, '#06b6d4');
-                }} />
-              <div className="toggle-track" />
-              <div className="toggle-thumb" />
-            </label>
-          </div>
 
-          <div className="toggle-row">
-            <div>
-              <div className="toggle-label">Humidifier</div>
-              <div className="toggle-sub">{humid < 30 ? 'Auto-active' : 'Standby'}</div>
+            {/* Humidity */}
+            <div className="card card-accent-blue">
+              <div className="card-title">💧 Humidity</div>
+              <div className="gauge-wrap">
+                <ArcGauge value={humid} min={0} max={100} color={humidColor} />
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <span className="stat-value" style={{ color: humidColor }}>{humid}</span>
+                <span className="stat-unit"> %RH</span>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <span className={`stat-status status-${humidStatus}`}>
+                  {humidStatus === 'good' ? '✓' : '⚠'} {statusLabel[humidStatus]}
+                </span>
+              </div>
             </div>
-            <label className="toggle">
-              <input type="checkbox" checked={humid < 30} readOnly />
-              <div className="toggle-track" />
-              <div className="toggle-thumb" />
-            </label>
-          </div>
 
-          <div className="toggle-row">
-            <div>
-              <div className="toggle-label">Pill Restock Alert</div>
-              <div className="toggle-sub">Notify when &lt; 5 pills</div>
+            {/* Pill Count */}
+            <div className="card card-accent-purple">
+              <div className="card-title">💊 Pill Count</div>
+              <div className="pill-display">
+                <div className={`pill-number ${pillColor}`}>{pills}</div>
+                <div className="pill-label">of {MAX_PILLS} remaining</div>
+              </div>
+              <div className="pill-bar-wrap">
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#94a3b8', marginBottom: 4 }}>
+                  <span>0</span><span>Stock level</span><span>{MAX_PILLS}</span>
+                </div>
+                <div className="pill-bar-track">
+                  <div className="pill-bar-fill" style={{
+                    width: `${(pills / MAX_PILLS) * 100}%`,
+                    background: pillBarColor
+                  }} />
+                </div>
+              </div>
+              {pills <= 5 && (
+                <div className="stat-status status-danger" style={{ marginTop: 10, justifyContent: 'center' }}>
+                  ⚠ Restock Required
+                </div>
+              )}
             </div>
-            <label className="toggle">
-              <input type="checkbox" defaultChecked readOnly />
-              <div className="toggle-track" />
-              <div className="toggle-thumb" />
-            </label>
-          </div>
-        </div>
 
-        {/* Camera */}
-        <div className="card card-accent-purple">
-          <div className="card-title">📷 Camera — Pill Compartment</div>
-          {cameraImg ? (
-            <img src={cameraImg} alt="pill compartment" className="camera-img" />
-          ) : (
-            <div className="camera-placeholder">
-              <div style={{ fontSize: 32 }}>📷</div>
-              <div>Awaiting capture</div>
-              <div style={{ fontSize: 11 }}>ambrx/camera/image</div>
-            </div>
-          )}
-          <button className="capture-btn" onClick={() => addLog('Capture triggered by caregiver', '#a855f7')}>
-            Trigger Capture
-          </button>
-        </div>
-      </div>
-
-      {/* ── Row 4: Alert Log ── */}
-      <div className="card card-accent-blue">
-        <div className="card-title">📋 Recent Alert Log</div>
-        {alertLog.map((e, i) => (
-          <div className="log-entry" key={i}>
-            <div className="log-dot" style={{ background: e.color }} />
-            <div>
-              <div className="log-time">{e.time}</div>
-              <div className="log-msg">{e.msg}</div>
+            {/* Light */}
+            <div className="card card-accent-yellow">
+              <div className="card-title">☀ Light Sensor</div>
+              <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                <div className="stat-value" style={{ color: light ? '#f59e0b' : '#06b6d4', fontSize: 28 }}>
+                  {lightLux} <span className="stat-unit">lux</span>
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <span className={`stat-status ${light ? 'status-warn' : 'status-good'}`}>
+                    {light ? '⚠ Alert: Box Open' : '✓ Safe'}
+                  </span>
+                </div>
+                <div style={{
+                  width: 60, height: 60,
+                  borderRadius: '50%',
+                  background: light ? '#fffbeb' : '#f0fdf4',
+                  border: `2px solid ${light ? '#f59e0b' : '#10b981'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '16px auto 0',
+                  fontSize: 24
+                }}>
+                  {light ? '🔆' : '🌑'}
+                </div>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+
+          {/* System Alerts + Controls + Camera */}
+          <div className="grid-3">
+
+            {/* Alerts */}
+            <div className="card card-accent-red">
+              <div className="card-title">🚨 System Alerts</div>
+              <div className="alert-row">
+                <span className="alert-name">🌡 Temperature</span>
+                <span className={`alert-badge ${temp > 30 ? 'badge-alert' : 'badge-ok'}`}>
+                  {temp > 30 ? 'ALERT' : 'OK'}
+                </span>
+              </div>
+              <div className="alert-row">
+                <span className="alert-name">💧 Humidity</span>
+                <span className={`alert-badge ${humid > 70 || humid < 30 ? 'badge-alert' : humid > 60 ? 'badge-warn' : 'badge-ok'}`}>
+                  {humid > 70 || humid < 30 ? 'ALERT' : humid > 60 ? 'WARN' : 'OK'}
+                </span>
+              </div>
+              <div className="alert-row">
+                <span className="alert-name">☀ Light</span>
+                <span className={`alert-badge ${light ? 'badge-warn' : 'badge-ok'}`}>
+                  {light ? 'OPEN' : 'OK'}
+                </span>
+              </div>
+              <div className="alert-row">
+                <span className="alert-name">💊 Pills</span>
+                <span className={`alert-badge ${pills <= 5 ? 'badge-alert' : pills <= 10 ? 'badge-warn' : 'badge-ok'}`}>
+                  {pills <= 5 ? 'RESTOCK' : pills <= 10 ? 'LOW' : 'OK'}
+                </span>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="card card-accent-green">
+              <div className="card-title">🎛 Controls</div>
+              <div className="toggle-row">
+                <div>
+                  <div className="toggle-label">Cooling Fan</div>
+                  <div className="toggle-sub">{cooling ? 'Running' : 'Standby'}</div>
+                </div>
+                <label className="toggle">
+                  <input type="checkbox" checked={cooling}
+                    onChange={e => {
+                      setCooling(e.target.checked);
+                      addLog(`Fan manually ${e.target.checked ? 'activated' : 'deactivated'}`, '#06b6d4');
+                    }} />
+                  <div className="toggle-track" />
+                  <div className="toggle-thumb" />
+                </label>
+              </div>
+              <div className="toggle-row">
+                <div>
+                  <div className="toggle-label">Humidifier</div>
+                  <div className="toggle-sub">{humid < 30 ? 'Auto-active' : 'Standby'}</div>
+                </div>
+                <label className="toggle">
+                  <input type="checkbox" checked={humid < 30} readOnly />
+                  <div className="toggle-track" />
+                  <div className="toggle-thumb" />
+                </label>
+              </div>
+              <div className="toggle-row">
+                <div>
+                  <div className="toggle-label">Pill Restock Alert</div>
+                  <div className="toggle-sub">Notify when &lt; 5 pills</div>
+                </div>
+                <label className="toggle">
+                  <input type="checkbox" defaultChecked readOnly />
+                  <div className="toggle-track" />
+                  <div className="toggle-thumb" />
+                </label>
+              </div>
+            </div>
+
+            {/* Camera */}
+            <div className="card card-accent-purple">
+              <div className="card-title">📷 Camera — Pill Compartment</div>
+              {cameraImg ? (
+                <img src={cameraImg} alt="pill compartment" className="camera-img" />
+              ) : (
+                <div className="camera-placeholder">
+                  <div style={{ fontSize: 32 }}>📷</div>
+                  <div>Awaiting capture</div>
+                  <div style={{ fontSize: 11 }}>ambrx/camera/image</div>
+                </div>
+              )}
+              <button className="capture-btn" onClick={() => addLog('Capture triggered by caregiver', '#a855f7')}>
+                Trigger Capture
+              </button>
+            </div>
+          </div>
+
+          {/* Alert Log */}
+          <div className="card card-accent-blue">
+            <div className="card-title">📋 Recent Alert Log</div>
+            {alertLog.map((e, i) => (
+              <div className="log-entry" key={i}>
+                <div className="log-dot" style={{ background: e.color }} />
+                <div>
+                  <div className="log-time">{e.time}</div>
+                  <div className="log-msg">{e.msg}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── Tab 2: Charts ── */}
+      {activeTab === 'charts' && (
+        <>
+          <div className="grid-2">
+            <div className="card card-accent-cyan">
+              <div className="card-title">📈 Temperature History</div>
+              <div className="chart-wrap">
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={tempHistory}>
+                    <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#94a3b8' }} interval="preserveStartEnd" />
+                    <YAxis domain={[15, 45]} tick={{ fontSize: 10, fill: '#94a3b8' }} width={32} />
+                    <Tooltip content={<CustomTooltip unit="°C" />} />
+                    <Line type="monotone" dataKey="value" stroke="#06b6d4"
+                      strokeWidth={2.5} dot={false} isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="chart-stat-row">
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Current</div>
+                  <div className="chart-stat-value" style={{ color: tempColor }}>{temp}°C</div>
+                </div>
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Min (session)</div>
+                  <div className="chart-stat-value">{tempHistory.length ? Math.min(...tempHistory.map(d => d.value)).toFixed(1) : '—'}°C</div>
+                </div>
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Max (session)</div>
+                  <div className="chart-stat-value">{tempHistory.length ? Math.max(...tempHistory.map(d => d.value)).toFixed(1) : '—'}°C</div>
+                </div>
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Avg (session)</div>
+                  <div className="chart-stat-value">{tempHistory.length ? (tempHistory.reduce((s, d) => s + d.value, 0) / tempHistory.length).toFixed(1) : '—'}°C</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card card-accent-blue">
+              <div className="card-title">📈 Humidity History</div>
+              <div className="chart-wrap">
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={humidHistory}>
+                    <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#94a3b8' }} interval="preserveStartEnd" />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} width={32} />
+                    <Tooltip content={<CustomTooltip unit="%" />} />
+                    <Line type="monotone" dataKey="value" stroke="#3b82f6"
+                      strokeWidth={2.5} dot={false} isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="chart-stat-row">
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Current</div>
+                  <div className="chart-stat-value" style={{ color: humidColor }}>{humid}%</div>
+                </div>
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Min (session)</div>
+                  <div className="chart-stat-value">{humidHistory.length ? Math.min(...humidHistory.map(d => d.value)).toFixed(1) : '—'}%</div>
+                </div>
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Max (session)</div>
+                  <div className="chart-stat-value">{humidHistory.length ? Math.max(...humidHistory.map(d => d.value)).toFixed(1) : '—'}%</div>
+                </div>
+                <div className="chart-stat">
+                  <div className="chart-stat-label">Avg (session)</div>
+                  <div className="chart-stat-value">{humidHistory.length ? (humidHistory.reduce((s, d) => s + d.value, 0) / humidHistory.length).toFixed(1) : '—'}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="last-updated">
         Last updated: {lastUpdate.toLocaleTimeString()} · AmbientRx Smart Medicine Box · ESE5160 T20
