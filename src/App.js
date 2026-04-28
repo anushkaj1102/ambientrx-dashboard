@@ -5,7 +5,7 @@ import {
 import './App.css';
 
 // ── Arc Gauge (SVG) ────────────────────────────────────────────────
-function ArcGauge({ value, min, max, color, size = 140 }) {
+function ArcGauge({ value, min, max, color, size = 140, trackColor = '#e2e8f0', centerColor = '#cbd5e1' }) {
   const pct = Math.min(Math.max((value - min) / (max - min), 0), 1);
   const angle = -210 + pct * 240;
   const r = 52;
@@ -30,7 +30,7 @@ function ArcGauge({ value, min, max, color, size = 140 }) {
     <svg width={size} height={size * 0.8}>
       {/* track */}
       <path d={arcPath(-210 + -90 + 90, -210 + 240 - 90 + 90, r)}
-        fill="none" stroke="#e2e8f0" strokeWidth={8} strokeLinecap="round"
+        fill="none" stroke={trackColor} strokeWidth={8} strokeLinecap="round"
         transform={`rotate(0, ${cx}, ${cy})`}
       />
       {/* filled arc */}
@@ -40,21 +40,21 @@ function ArcGauge({ value, min, max, color, size = 140 }) {
       {/* needle dot */}
       <circle cx={needle.x} cy={needle.y} r={4} fill={color} />
       {/* center dot */}
-      <circle cx={cx} cy={cy} r={3} fill="#cbd5e1" />
+      <circle cx={cx} cy={cy} r={3} fill={centerColor} />
     </svg>
   );
 }
 
 // ── Custom Tooltip ──────────────────────────────────────────────────
-function CustomTooltip({ active, payload, label, unit }) {
+function CustomTooltip({ active, payload, label, unit, bg, border, labelColor }) {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: '#ffffff', border: '1px solid #e2e8f0',
+        background: bg || '#ffffff', border: `1px solid ${border || '#e2e8f0'}`,
         borderRadius: 6, padding: '6px 10px', fontSize: 12,
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
       }}>
-        <div style={{ color: '#64748b' }}>{label}</div>
+        <div style={{ color: labelColor || '#64748b' }}>{label}</div>
         <div style={{ color: payload[0].color, fontWeight: 600 }}>
           {payload[0].value}{unit}
         </div>
@@ -69,6 +69,11 @@ export default function App() {
   const MAX_PILLS = 30;
 
   const [activeTab, setActiveTab] = useState('overview');
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  }, [dark]);
 
   // Live sensor state
   const [temp, setTemp]       = useState(24.1);
@@ -141,6 +146,14 @@ export default function App() {
 
   const statusLabel = { good: 'Good', warn: 'Warning', danger: 'Alert' };
 
+  const gaugeTrack  = dark ? '#1e293b' : '#e2e8f0';
+  const gaugeCenter = dark ? '#334155' : '#cbd5e1';
+  const chartGrid   = dark ? '#1a2540' : '#f1f5f9';
+  const chartTick   = dark ? '#475569' : '#94a3b8';
+  const tooltipBg   = dark ? '#1e293b' : '#ffffff';
+  const tooltipBorder = dark ? '#334155' : '#e2e8f0';
+  const tooltipLabel  = dark ? '#94a3b8' : '#64748b';
+
   return (
     <div className="dashboard">
 
@@ -153,9 +166,14 @@ export default function App() {
             <div className="header-subtitle">Smart Medicine Storage Monitor · MQTT: 20.110.157.53</div>
           </div>
         </div>
-        <div className="status-badge">
-          <div className={`status-dot ${connected ? '' : 'offline'}`} />
-          {connected ? 'Live' : 'Offline'}
+        <div className="header-right">
+          <button className="theme-btn" onClick={() => setDark(d => !d)} title="Toggle theme">
+            {dark ? '☀️' : '🌙'}
+          </button>
+          <div className="status-badge">
+            <div className={`status-dot ${connected ? '' : 'offline'}`} />
+            {connected ? 'Live' : 'Offline'}
+          </div>
         </div>
       </div>
 
@@ -185,7 +203,7 @@ export default function App() {
             <div className="card card-accent-cyan">
               <div className="card-title">🌡 Temperature</div>
               <div className="gauge-wrap">
-                <ArcGauge value={temp} min={0} max={50} color={tempColor} />
+                <ArcGauge value={temp} min={0} max={50} color={tempColor} trackColor={gaugeTrack} centerColor={gaugeCenter} />
               </div>
               <div style={{ textAlign: 'center' }}>
                 <span className="stat-value" style={{ color: tempColor }}>{temp}</span>
@@ -202,7 +220,7 @@ export default function App() {
             <div className="card card-accent-blue">
               <div className="card-title">💧 Humidity</div>
               <div className="gauge-wrap">
-                <ArcGauge value={humid} min={0} max={100} color={humidColor} />
+                <ArcGauge value={humid} min={0} max={100} color={humidColor} trackColor={gaugeTrack} centerColor={gaugeCenter} />
               </div>
               <div style={{ textAlign: 'center' }}>
                 <span className="stat-value" style={{ color: humidColor }}>{humid}</span>
@@ -384,10 +402,10 @@ export default function App() {
               <div className="chart-wrap">
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={tempHistory}>
-                    <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#94a3b8' }} interval="preserveStartEnd" />
-                    <YAxis domain={[15, 45]} tick={{ fontSize: 10, fill: '#94a3b8' }} width={32} />
-                    <Tooltip content={<CustomTooltip unit="°C" />} />
+                    <CartesianGrid stroke={chartGrid} strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: chartTick }} interval="preserveStartEnd" />
+                    <YAxis domain={[15, 45]} tick={{ fontSize: 10, fill: chartTick }} width={32} />
+                    <Tooltip content={<CustomTooltip unit="°C" bg={tooltipBg} border={tooltipBorder} labelColor={tooltipLabel} />} />
                     <Line type="monotone" dataKey="value" stroke="#06b6d4"
                       strokeWidth={2.5} dot={false} isAnimationActive={false} />
                   </LineChart>
@@ -418,10 +436,10 @@ export default function App() {
               <div className="chart-wrap">
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={humidHistory}>
-                    <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#94a3b8' }} interval="preserveStartEnd" />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} width={32} />
-                    <Tooltip content={<CustomTooltip unit="%" />} />
+                    <CartesianGrid stroke={chartGrid} strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10, fill: chartTick }} interval="preserveStartEnd" />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: chartTick }} width={32} />
+                    <Tooltip content={<CustomTooltip unit="%" bg={tooltipBg} border={tooltipBorder} labelColor={tooltipLabel} />} />
                     <Line type="monotone" dataKey="value" stroke="#3b82f6"
                       strokeWidth={2.5} dot={false} isAnimationActive={false} />
                   </LineChart>
