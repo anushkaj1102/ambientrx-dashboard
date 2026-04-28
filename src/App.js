@@ -72,11 +72,11 @@ export default function App() {
   const [humid, setHumid]     = useState(52.3);
   const [light, setLight]     = useState(false);
   const [lightLux, setLightLux] = useState(120);
-  const [pills, setPills]     = useState(18);
+  const [pills]               = useState(18);
   const [cooling, setCooling] = useState(false);
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [cameraImg] = useState(null);
+  const [cameraImg]               = useState(null);
 
   // History data for charts
   const [tempHistory, setTempHistory]   = useState([]);
