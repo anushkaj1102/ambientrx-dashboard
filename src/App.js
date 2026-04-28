@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import mqtt from 'mqtt';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
@@ -141,38 +140,9 @@ export default function App() {
 
   // ── MQTT live connection ──────────────────────────────────────────
   useEffect(() => {
-    const client = mqtt.connect('ws://20.110.157.53:9001');
+    let client;
 
-    client.on('connect', () => {
-      mqttActiveRef.current = true;
-      setConnected(true);
-      addLog('Connected to MQTT broker', '#06b6d4');
-      client.subscribe([
-        'ambrx/temperature',
-        'ambrx/humidity',
-        'ambrx/light/lux',
-        'ambrx/light/alert',
-        'ambrx/pillbox/count',
-        'ambrx/pillbox/image',
-      ]);
-    });
-
-    client.on('reconnect', () => {
-      setConnected(false);
-    });
-
-    client.on('offline', () => {
-      mqttActiveRef.current = false;
-      setConnected(false);
-      addLog('MQTT offline — simulation active', '#f59e0b');
-    });
-
-    client.on('error', () => {
-      mqttActiveRef.current = false;
-      setConnected(false);
-    });
-
-    client.on('message', (topic, message) => {
+    const handleMessage = (topic, message) => {
       const payload = message.toString();
       const now = new Date();
       const label = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -220,16 +190,57 @@ export default function App() {
         }
         case 'ambrx/pillbox/image': {
           try {
-            const b64 = btoa(String.fromCharCode(...new Uint8Array(message)));
+            const bytes = new Uint8Array(message);
+            let binary = '';
+            const chunkSize = 8192;
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+              binary += String.fromCharCode(...bytes.slice(i, i + chunkSize));
+            }
+            const b64 = btoa(binary);
             if (b64.length > 20) setCameraImg(`data:image/jpeg;base64,${b64}`);
           } catch (_) {}
           break;
         }
         default: break;
       }
+    };
+
+    import('mqtt').then(({ default: mqtt }) => {
+      client = mqtt.connect('ws://20.110.157.53:9001', { connectTimeout: 8000 });
+
+      client.on('connect', () => {
+        mqttActiveRef.current = true;
+        setConnected(true);
+        addLog('Connected to MQTT broker', '#06b6d4');
+        client.subscribe([
+          'ambrx/temperature',
+          'ambrx/humidity',
+          'ambrx/light/lux',
+          'ambrx/light/alert',
+          'ambrx/pillbox/count',
+          'ambrx/pillbox/image',
+        ]);
+      });
+
+      client.on('reconnect', () => setConnected(false));
+
+      client.on('offline', () => {
+        mqttActiveRef.current = false;
+        setConnected(false);
+        addLog('MQTT offline — simulation active', '#f59e0b');
+      });
+
+      client.on('error', () => {
+        mqttActiveRef.current = false;
+        setConnected(false);
+      });
+
+      client.on('message', handleMessage);
+    }).catch(() => {
+      // mqtt failed to load — simulation fallback will handle it
     });
 
-    return () => { client.end(); };
+    return () => { if (client) client.end(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Derived status ────────────────────────────────────────────────
