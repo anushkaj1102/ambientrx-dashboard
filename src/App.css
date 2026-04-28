@@ -5,8 +5,8 @@
 }
 
 body {
-  background: #070d1a;
-  color: #e2e8f0;
+  background: #f1f5f9;
+  color: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
 }
@@ -24,7 +24,7 @@ body {
   justify-content: space-between;
   margin-bottom: 28px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .header-left {
@@ -47,12 +47,12 @@ body {
 .header h1 {
   font-size: 22px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: #0f172a;
 }
 
 .header-subtitle {
   font-size: 13px;
-  color: #64748b;
+  color: #94a3b8;
   margin-top: 2px;
 }
 
@@ -60,19 +60,19 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #0f1f0f;
-  border: 1px solid #166534;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
   border-radius: 20px;
   padding: 6px 14px;
   font-size: 13px;
-  color: #4ade80;
+  color: #16a34a;
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #4ade80;
+  background: #22c55e;
   animation: pulse 2s infinite;
 }
 
@@ -112,19 +112,20 @@ body {
 
 /* ── Cards ── */
 .card {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
-.card-accent-cyan { border-top: 2px solid #06b6d4; }
-.card-accent-blue { border-top: 2px solid #3b82f6; }
-.card-accent-green { border-top: 2px solid #10b981; }
+.card-accent-cyan   { border-top: 2px solid #06b6d4; }
+.card-accent-blue   { border-top: 2px solid #3b82f6; }
+.card-accent-green  { border-top: 2px solid #10b981; }
 .card-accent-yellow { border-top: 2px solid #f59e0b; }
-.card-accent-red { border-top: 2px solid #ef4444; }
+.card-accent-red    { border-top: 2px solid #ef4444; }
 .card-accent-purple { border-top: 2px solid #a855f7; }
 
 .card-title {
@@ -132,7 +133,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #64748b;
+  color: #94a3b8;
   margin-bottom: 14px;
   display: flex;
   align-items: center;
@@ -155,7 +156,7 @@ body {
 
 .stat-label {
   font-size: 12px;
-  color: #64748b;
+  color: #94a3b8;
   margin-top: 6px;
 }
 
@@ -170,9 +171,9 @@ body {
   margin-top: 8px;
 }
 
-.status-good { background: #052e16; color: #4ade80; }
-.status-warn { background: #1c1003; color: #fbbf24; }
-.status-danger { background: #2d0a0a; color: #f87171; }
+.status-good   { background: #f0fdf4; color: #16a34a; }
+.status-warn   { background: #fffbeb; color: #d97706; }
+.status-danger { background: #fef2f2; color: #dc2626; }
 
 /* ── Arc Gauge ── */
 .gauge-wrap {
@@ -186,7 +187,7 @@ body {
   justify-content: space-between;
   width: 100%;
   font-size: 10px;
-  color: #475569;
+  color: #cbd5e1;
   margin-top: -8px;
 }
 
@@ -205,8 +206,8 @@ body {
   line-height: 1;
 }
 
-.pill-number.safe { color: #06b6d4; }
-.pill-number.low { color: #f59e0b; }
+.pill-number.safe     { color: #06b6d4; }
+.pill-number.low      { color: #f59e0b; }
 .pill-number.critical { color: #ef4444; animation: blink 1s infinite; }
 
 @keyframes blink {
@@ -216,7 +217,7 @@ body {
 
 .pill-label {
   font-size: 12px;
-  color: #64748b;
+  color: #94a3b8;
   margin-top: 6px;
   text-align: center;
 }
@@ -228,7 +229,7 @@ body {
 
 .pill-bar-track {
   height: 6px;
-  background: #1e293b;
+  background: #e2e8f0;
   border-radius: 3px;
   overflow: hidden;
 }
@@ -245,14 +246,14 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .alert-row:last-child { border-bottom: none; }
 
 .alert-name {
   font-size: 13px;
-  color: #94a3b8;
+  color: #64748b;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -265,9 +266,9 @@ body {
   border-radius: 12px;
 }
 
-.badge-ok { background: #052e16; color: #4ade80; }
-.badge-alert { background: #2d0a0a; color: #f87171; }
-.badge-warn { background: #1c1003; color: #fbbf24; }
+.badge-ok    { background: #f0fdf4; color: #16a34a; }
+.badge-alert { background: #fef2f2; color: #dc2626; }
+.badge-warn  { background: #fffbeb; color: #d97706; }
 
 /* ── Toggle switch ── */
 .toggle-row {
@@ -275,19 +276,19 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .toggle-row:last-child { border-bottom: none; }
 
 .toggle-label {
   font-size: 13px;
-  color: #cbd5e1;
+  color: #334155;
 }
 
 .toggle-sub {
   font-size: 11px;
-  color: #475569;
+  color: #94a3b8;
   margin-top: 2px;
 }
 
@@ -302,7 +303,7 @@ body {
 .toggle-track {
   position: absolute;
   inset: 0;
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 12px;
   cursor: pointer;
   transition: background 0.2s;
@@ -320,6 +321,7 @@ body {
   left: 3px;
   transition: transform 0.2s;
   pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
 .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
@@ -335,7 +337,7 @@ body {
   align-items: flex-start;
   gap: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid #f1f5f9;
   font-size: 12px;
 }
 
@@ -349,21 +351,21 @@ body {
   flex-shrink: 0;
 }
 
-.log-time { color: #475569; font-size: 11px; }
-.log-msg { color: #94a3b8; }
+.log-time { color: #94a3b8; font-size: 11px; }
+.log-msg  { color: #475569; }
 
 /* ── Camera ── */
 .camera-placeholder {
   width: 100%;
   height: 180px;
-  background: #0a1628;
-  border: 1px dashed #1e293b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #334155;
+  color: #94a3b8;
   font-size: 13px;
   gap: 8px;
 }
@@ -379,7 +381,7 @@ body {
   width: 100%;
   padding: 10px;
   background: #06b6d4;
-  color: #020d18;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   font-size: 13px;
@@ -394,10 +396,10 @@ body {
 .last-updated {
   text-align: center;
   font-size: 11px;
-  color: #334155;
+  color: #cbd5e1;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* ── Responsive ── */

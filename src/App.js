@@ -30,7 +30,7 @@ function ArcGauge({ value, min, max, color, size = 140 }) {
     <svg width={size} height={size * 0.8}>
       {/* track */}
       <path d={arcPath(-210 + -90 + 90, -210 + 240 - 90 + 90, r)}
-        fill="none" stroke="#1e293b" strokeWidth={8} strokeLinecap="round"
+        fill="none" stroke="#e2e8f0" strokeWidth={8} strokeLinecap="round"
         transform={`rotate(0, ${cx}, ${cy})`}
       />
       {/* filled arc */}
@@ -40,7 +40,7 @@ function ArcGauge({ value, min, max, color, size = 140 }) {
       {/* needle dot */}
       <circle cx={needle.x} cy={needle.y} r={4} fill={color} />
       {/* center dot */}
-      <circle cx={cx} cy={cy} r={3} fill="#334155" />
+      <circle cx={cx} cy={cy} r={3} fill="#cbd5e1" />
     </svg>
   );
 }
@@ -50,10 +50,11 @@ function CustomTooltip({ active, payload, label, unit }) {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: '#1e293b', border: '1px solid #334155',
-        borderRadius: 6, padding: '6px 10px', fontSize: 12
+        background: '#ffffff', border: '1px solid #e2e8f0',
+        borderRadius: 6, padding: '6px 10px', fontSize: 12,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
       }}>
-        <div style={{ color: '#94a3b8' }}>{label}</div>
+        <div style={{ color: '#64748b' }}>{label}</div>
         <div style={{ color: payload[0].color, fontWeight: 600 }}>
           {payload[0].value}{unit}
         </div>
@@ -234,7 +235,7 @@ export default function App() {
               marginTop: 16,
               width: 60, height: 60,
               borderRadius: '50%',
-              background: light ? '#1c1003' : '#052e16',
+              background: light ? '#fffbeb' : '#f0fdf4',
               border: `2px solid ${light ? '#f59e0b' : '#10b981'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '16px auto 0',
@@ -253,9 +254,9 @@ export default function App() {
           <div className="chart-wrap">
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={tempHistory}>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#475569' }} interval="preserveStartEnd" />
-                <YAxis domain={[15, 45]} tick={{ fontSize: 9, fill: '#475569' }} width={28} />
+                <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
+                <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#94a3b8' }} interval="preserveStartEnd" />
+                <YAxis domain={[15, 45]} tick={{ fontSize: 9, fill: '#94a3b8' }} width={28} />
                 <Tooltip content={<CustomTooltip unit="°C" />} />
                 <Line type="monotone" dataKey="value" stroke="#06b6d4"
                   strokeWidth={2} dot={false} isAnimationActive={false} />
@@ -269,9 +270,9 @@ export default function App() {
           <div className="chart-wrap">
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={humidHistory}>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#475569' }} interval="preserveStartEnd" />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#475569' }} width={28} />
+                <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" />
+                <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#94a3b8' }} interval="preserveStartEnd" />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#94a3b8' }} width={28} />
                 <Tooltip content={<CustomTooltip unit="%" />} />
                 <Line type="monotone" dataKey="value" stroke="#3b82f6"
                   strokeWidth={2} dot={false} isAnimationActive={false} />
