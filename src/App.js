@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import mqtt from 'mqtt';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
@@ -75,16 +76,19 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }, [dark]);
 
+  // Tracks whether real MQTT data is flowing — suppresses simulation when true
+  const mqttActiveRef = useRef(false);
+
   // Live sensor state
   const [temp, setTemp]       = useState(24.1);
   const [humid, setHumid]     = useState(52.3);
   const [light, setLight]     = useState(false);
   const [lightLux, setLightLux] = useState(120);
-  const [pills]               = useState(18);
-  const [cooling, setCooling] = useState(false);
+  const [pills, setPills]         = useState(18);
+  const [cooling, setCooling]     = useState(false);
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [cameraImg]               = useState(null);
+  const [cameraImg, setCameraImg] = useState(null);
 
   // History data for charts
   const [tempHistory, setTempHistory]   = useState([]);
@@ -100,9 +104,11 @@ export default function App() {
     setAlertLog(prev => [{ time, msg, color }, ...prev].slice(0, 6));
   };
 
-  // ── Simulate live data (replace with MQTT later) ──────────────────
+  // ── Simulation fallback — only runs when MQTT is not connected ────
   useEffect(() => {
     const tick = () => {
+      if (mqttActiveRef.current) return; // real data flowing — skip simulation
+
       const now = new Date();
       const label = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -116,24 +122,115 @@ export default function App() {
       setLightLux(newLux);
       setLight(lightOn);
       setLastUpdate(now);
-      setConnected(true);
 
       setTempHistory(prev => [...prev.slice(-19), { label, value: newTemp }]);
       setHumidHistory(prev => [...prev.slice(-19), { label, value: newHumid }]);
 
-      if (newTemp > 30)           addLog(`High temp: ${newTemp}°C — cooling activated`, '#ef4444');
-      if (newHumid > 70)          addLog(`High humidity: ${newHumid}% RH`, '#f59e0b');
-      if (newHumid < 30)          addLog(`Low humidity: ${newHumid}% RH`, '#f59e0b');
-      if (lightOn)                addLog('Light alert: box open too long', '#f59e0b');
+      if (newTemp > 30)  addLog(`[SIM] High temp: ${newTemp}°C`, '#ef4444');
+      if (newHumid > 70) addLog(`[SIM] High humidity: ${newHumid}% RH`, '#f59e0b');
+      if (newHumid < 30) addLog(`[SIM] Low humidity: ${newHumid}% RH`, '#f59e0b');
+      if (lightOn)       addLog('[SIM] Light alert: box open too long', '#f59e0b');
 
-      // auto cooling
       setCooling(newTemp > 30);
     };
 
     tick();
     const id = setInterval(tick, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── MQTT live connection ──────────────────────────────────────────
+  useEffect(() => {
+    const client = mqtt.connect('ws://20.110.157.53:9001');
+
+    client.on('connect', () => {
+      mqttActiveRef.current = true;
+      setConnected(true);
+      addLog('Connected to MQTT broker', '#06b6d4');
+      client.subscribe([
+        'ambrx/temperature',
+        'ambrx/humidity',
+        'ambrx/light/lux',
+        'ambrx/light/alert',
+        'ambrx/pillbox/count',
+        'ambrx/pillbox/image',
+      ]);
+    });
+
+    client.on('reconnect', () => {
+      setConnected(false);
+    });
+
+    client.on('offline', () => {
+      mqttActiveRef.current = false;
+      setConnected(false);
+      addLog('MQTT offline — simulation active', '#f59e0b');
+    });
+
+    client.on('error', () => {
+      mqttActiveRef.current = false;
+      setConnected(false);
+    });
+
+    client.on('message', (topic, message) => {
+      const payload = message.toString();
+      const now = new Date();
+      const label = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLastUpdate(now);
+
+      switch (topic) {
+        case 'ambrx/temperature': {
+          const v = parseFloat(payload);
+          if (!isNaN(v)) {
+            setTemp(v);
+            setTempHistory(prev => [...prev.slice(-19), { label, value: v }]);
+            if (v > 30) addLog(`High temp: ${v}°C — cooling on`, '#ef4444');
+            setCooling(v > 30);
+          }
+          break;
+        }
+        case 'ambrx/humidity': {
+          const v = parseFloat(payload);
+          if (!isNaN(v)) {
+            setHumid(v);
+            setHumidHistory(prev => [...prev.slice(-19), { label, value: v }]);
+            if (v > 70) addLog(`High humidity: ${v}% RH`, '#f59e0b');
+            if (v < 30) addLog(`Low humidity: ${v}% RH`, '#f59e0b');
+          }
+          break;
+        }
+        case 'ambrx/light/lux': {
+          const v = parseFloat(payload);
+          if (!isNaN(v)) setLightLux(v);
+          break;
+        }
+        case 'ambrx/light/alert': {
+          const on = ['true', '1', 'on'].includes(payload.trim().toLowerCase());
+          setLight(on);
+          if (on) addLog('Light alert: box open too long', '#f59e0b');
+          break;
+        }
+        case 'ambrx/pillbox/count': {
+          const v = parseInt(payload, 10);
+          if (!isNaN(v)) {
+            setPills(v);
+            if (v <= 5) addLog(`Low pill count: ${v} remaining`, '#ef4444');
+          }
+          break;
+        }
+        case 'ambrx/pillbox/image': {
+          try {
+            const b64 = btoa(String.fromCharCode(...new Uint8Array(message)));
+            if (b64.length > 20) setCameraImg(`data:image/jpeg;base64,${b64}`);
+          } catch (_) {}
+          break;
+        }
+        default: break;
+      }
+    });
+
+    return () => { client.end(); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Derived status ────────────────────────────────────────────────
   const tempColor  = temp > 30 ? '#ef4444' : temp > 26 ? '#f59e0b' : '#06b6d4';
@@ -368,7 +465,7 @@ export default function App() {
                 <div className="camera-placeholder">
                   <div style={{ fontSize: 32 }}>📷</div>
                   <div>Awaiting capture</div>
-                  <div style={{ fontSize: 11 }}>ambrx/camera/image</div>
+                  <div style={{ fontSize: 11 }}>ambrx/pillbox/image</div>
                 </div>
               )}
               <button className="capture-btn" onClick={() => addLog('Capture triggered by caregiver', '#a855f7')}>
